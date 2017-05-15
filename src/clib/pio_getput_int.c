@@ -1011,7 +1011,9 @@ int PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Off
                 /* This is a scalar var. */
                 LOG((2, "pnetcdf writing scalar with ncmpi_put_vars_*() file->fh = %d varid = %d",
                      file->fh, varid));
-                pioassert(!start && !count && !stride, "expected NULLs", __FILE__, __LINE__);
+
+                if (start || count || stride)
+                    LOG((2, "Ignoring provided start/count/stride for 0 dim var", __FILE__, __LINE__));
 
                 /* Turn on independent access for pnetcdf file. */
                 if ((ierr = ncmpi_begin_indep_data(file->fh)))
@@ -1024,25 +1026,25 @@ int PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Off
                     switch(xtype)
                     {
                     case NC_BYTE:
-                        ierr = ncmpi_put_vars_schar(file->fh, varid, start, count, stride, buf);
+                        ierr = ncmpi_put_var_schar(file->fh, varid, buf);
                         break;
                     case NC_CHAR:
-                        ierr = ncmpi_put_vars_text(file->fh, varid, start, count, stride, buf);
+                        ierr = ncmpi_put_var_text(file->fh, varid, buf);
                         break;
                     case NC_SHORT:
-                        ierr = ncmpi_put_vars_short(file->fh, varid, start, count, stride, buf);
+                        ierr = ncmpi_put_var_short(file->fh, varid, buf);
                         break;
                     case NC_INT:
-                        ierr = ncmpi_put_vars_int(file->fh, varid, start, count, stride, buf);
+                        ierr = ncmpi_put_var_int(file->fh, varid, buf);
                         break;
                     case PIO_LONG_INTERNAL:
-                        ierr = ncmpi_put_vars_long(file->fh, varid, start, count, stride, buf);
+                        ierr = ncmpi_put_var_long(file->fh, varid, buf);
                         break;
                     case NC_FLOAT:
-                        ierr = ncmpi_put_vars_float(file->fh, varid, start, count, stride, buf);
+                        ierr = ncmpi_put_var_float(file->fh, varid, buf);
                         break;
                     case NC_DOUBLE:
-                        ierr = ncmpi_put_vars_double(file->fh, varid, start, count, stride, buf);
+                        ierr = ncmpi_put_var_double(file->fh, varid, buf);
                         break;
                     default:
                         return pio_err(ios, file, PIO_EBADIOTYPE, __FILE__, __LINE__);
