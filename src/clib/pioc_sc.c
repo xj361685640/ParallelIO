@@ -286,6 +286,12 @@ int CalcStartandCount(int pio_type, int ndims, const int *gdims, int num_io_proc
     long int pknt;
     long int tpsize = 0;
     int ret;
+    int sz_bytes = 0;
+    int max_ioprocs = 0;
+    const int HUNDRED_MB = 1024 * 1024;
+    const int ONE_GIG = 1024 * 1024 * 1024;
+    const int MAX_PROCS_LESS_HUNDRED_MB = 8;
+    const int MAX_PROCS_LESS_ONE_GIG = 128;
 
     /* Check inputs. */
     pioassert(pio_type > 0 && ndims > 0 && gdims && num_io_procs > 0 && start && count,
@@ -315,6 +321,16 @@ int CalcStartandCount(int pio_type, int ndims, const int *gdims, int num_io_proc
     /* Find the number of ioprocs that are needed so that we have
      * blocksize data on each iotask*/
     use_io_procs = max(1, min((int)((float)pgdims / (float)minblocksize + 0.5), num_io_procs));
+
+    sz_bytes = pgdims * basesize;
+    max_ioprocs = use_io_procs;
+    if(sz_bytes < HUNDRED_MB)
+        max_ioprocs = MAX_PROCS_LESS_HUNDRED_MB;
+    else if(sz_bytes < ONE_GIG)
+        max_ioprocs = MAX_PROCS_LESS_ONE_GIG;
+
+    if(use_io_procs > max_ioprocs)
+        use_io_procs = max_ioprocs;
 
     /* Initialize to 0. */
     converged = 0;
