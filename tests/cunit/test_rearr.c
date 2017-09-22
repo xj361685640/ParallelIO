@@ -992,7 +992,7 @@ int test_rearrange_comp2io(MPI_Comm test_comm, int my_rank)
         return ret;
 
     /* Run the function to test. */
-    if ((ret = rearrange_comp2io(ios, iodesc, sbuf, rbuf, nvars)))
+    if ((ret = rearrange_comp2io(ios, iodesc, sbuf, rbuf, nvars, 4)))
         return ret;
 
     /* We created send types, so free them. */

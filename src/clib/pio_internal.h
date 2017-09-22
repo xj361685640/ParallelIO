@@ -242,7 +242,7 @@ extern "C" {
 
     /* Move data from compute tasks to IO tasks. */
     int rearrange_comp2io(iosystem_desc_t *ios, io_desc_t *iodesc, void *sbuf, void *rbuf,
-                          int nvars);
+                          int nvars, int type_size);
 
     void performance_tune_rearranger(iosystem_desc_t *ios, io_desc_t *iodesc);
 
