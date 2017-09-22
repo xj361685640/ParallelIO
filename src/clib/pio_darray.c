@@ -189,7 +189,7 @@ int PIOc_write_darray_multi(int ncid, const int *varids, int ioid, int nvars,
             if (!mpierr)
                 mpierr = MPI_Bcast(&arraylen, 1, MPI_OFFSET, ios->compmaster, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(array, arraylen * iodesc->piotype_size, MPI_CHAR, ios->compmaster,
+                mpierr = MPI_Bcast(array, arraylen * vdesc0->pio_type_size, MPI_CHAR, ios->compmaster,
                                    ios->intercomm);
             if (!mpierr)
                 mpierr = MPI_Bcast(&frame_present, 1, MPI_CHAR, ios->compmaster, ios->intercomm);
@@ -198,7 +198,7 @@ int PIOc_write_darray_multi(int ncid, const int *varids, int ioid, int nvars,
             if (!mpierr)
                 mpierr = MPI_Bcast(&fillvalue_present, 1, MPI_CHAR, ios->compmaster, ios->intercomm);
             if (!mpierr && fillvalue_present)
-                mpierr = MPI_Bcast((void *)fillvalue, nvars * iodesc->piotype_size, MPI_CHAR,
+                mpierr = MPI_Bcast((void *)fillvalue, nvars * vdesc0->pio_type_size, MPI_CHAR,
                                    ios->compmaster, ios->intercomm);
             if (!mpierr)
                 mpierr = MPI_Bcast(&flushtodisk_int, 1, MPI_INT, ios->compmaster, ios->intercomm);

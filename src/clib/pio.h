@@ -300,9 +300,6 @@ typedef struct io_desc_t
     /** The PIO type of the data. */
     int piotype;
 
-    /** The size of one element of the piotype. */
-    int piotype_size;
-
     /** The MPI type of the data. */
     MPI_Datatype mpitype;
 

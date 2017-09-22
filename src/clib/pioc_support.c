@@ -670,7 +670,7 @@ int malloc_iodesc(iosystem_desc_t *ios, int piotype, int ndims,
 
     /* Remember the pio type and its size. */
     (*iodesc)->piotype = piotype;
-    (*iodesc)->piotype_size = type_size;
+    /* (*iodesc)->piotype_size = type_size; */
 
     /* Remember the MPI type. */
     (*iodesc)->mpitype = mpi_type;

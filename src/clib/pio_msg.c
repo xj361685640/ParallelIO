@@ -2099,6 +2099,7 @@ int write_darray_multi_handler(iosystem_desc_t *ios)
 {
     int ncid;
     file_desc_t *file;     /* Pointer to file information. */
+    var_desc_t *vdesc;     /* Info about the var being written. */
     int nvars;
     int ioid;
     io_desc_t *iodesc;     /* The IO description. */
@@ -2129,15 +2130,23 @@ int write_darray_multi_handler(iosystem_desc_t *ios)
     if ((mpierr = MPI_Bcast(&ioid, 1, MPI_INT, 0, ios->intercomm)))
         return check_mpi2(ios, NULL, mpierr, __FILE__, __LINE__);
 
+    /* Get file info based on ncid. */
+    if ((ret = pio_get_file(ncid, &file)))
+        return pio_err(NULL, NULL, ret, __FILE__, __LINE__);
+
+    /* Get var description. */
+    if ((ret = get_var_desc(varids[0], &file->varlist, &vdesc)))
+        return pio_err(ios, file, ret, __FILE__, __LINE__);
+
     /* Get decomposition information. */
     if (!(iodesc = pio_get_iodesc_from_id(ioid)))
         return pio_err(ios, file, PIO_EBADID, __FILE__, __LINE__);
 
     if ((mpierr = MPI_Bcast(&arraylen, 1, MPI_OFFSET, 0, ios->intercomm)))
         return check_mpi2(ios, NULL, mpierr, __FILE__, __LINE__);
-    if (!(array = malloc(arraylen * iodesc->piotype_size)))
+    if (!(array = malloc(arraylen * vdesc->pio_type_size)))
         return pio_err(NULL, NULL, PIO_ENOMEM, __FILE__, __LINE__);
-    if ((mpierr = MPI_Bcast(array, arraylen * iodesc->piotype_size, MPI_CHAR, 0,
+    if ((mpierr = MPI_Bcast(array, arraylen * vdesc->pio_type_size, MPI_CHAR, 0,
                             ios->intercomm)))
         return check_mpi2(ios, NULL, mpierr, __FILE__, __LINE__);
     if ((mpierr = MPI_Bcast(&frame_present, 1, MPI_CHAR, 0, ios->intercomm)))
@@ -2153,9 +2162,9 @@ int write_darray_multi_handler(iosystem_desc_t *ios)
         return check_mpi2(ios, NULL, mpierr, __FILE__, __LINE__);
     if (fillvalue_present)
     {
-        if (!(fillvalue = malloc(nvars * iodesc->piotype_size)))
+        if (!(fillvalue = malloc(nvars * vdesc->pio_type_size)))
             return pio_err(ios, NULL, PIO_ENOMEM, __FILE__, __LINE__);
-        if ((mpierr = MPI_Bcast(fillvalue, nvars * iodesc->piotype_size, MPI_CHAR, 0, ios->intercomm)))
+        if ((mpierr = MPI_Bcast(fillvalue, nvars * vdesc->pio_type_size, MPI_CHAR, 0, ios->intercomm)))
             return check_mpi2(ios, NULL, mpierr, __FILE__, __LINE__);
     }
     if ((mpierr = MPI_Bcast(&flushtodisk, 1, MPI_INT, 0, ios->intercomm)))
@@ -2163,10 +2172,6 @@ int write_darray_multi_handler(iosystem_desc_t *ios)
     LOG((1, "write_darray_multi_handler ncid = %d nvars = %d ioid = %d arraylen = %d "
          "frame_present = %d fillvalue_present flushtodisk = %d", ncid, nvars,
          ioid, arraylen, frame_present, fillvalue_present, flushtodisk));
-
-    /* Get file info based on ncid. */
-    if ((ret = pio_get_file(ncid, &file)))
-        return pio_err(NULL, NULL, ret, __FILE__, __LINE__);
 
     /* Get decomposition information. */
     if (!(iodesc = pio_get_iodesc_from_id(ioid)))
